@@ -4,5 +4,17 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
+    <p>
+        <label>SessionId:@(ViewBag.SessionId?.ToString())</label>
+    </p>
+    <p>
+        <label>SessionData:@(ViewBag.SessionData?.ToString())</label>
+    </p>
+    <p>
+        <label>SessionByteArrayData:@(ViewBag.SessionByteArrayData?.ToString())</label>
+    </p>
+    <p>
+        <label>CacheData:@(ViewBag.CacheData?.ToString())</label>
+    </p>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,25 @@ namespace AspNetCoreSession
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDistributedSqlServerCache(options =>
+                                                  {
+                                                      options.ConnectionString = Configuration.GetConnectionString("DistCache_ConnectionString");
+                                                      options.SchemaName       = "dbo";
+                                                      options.TableName        = "CacheTable";
+
+                                                      // options.DefaultSlidingExpiration  // 預設二十分鐘
+                                                      // options.ExpiredItemsDeletionInterval // 預設三十分鐘後會刪除
+                                                  });
+            services.AddSession(options =>
+                                {
+                                    options.Cookie = new CookieBuilder
+                                                     {
+                                                         Name = "Test.Session"
+                                                     };
+                                    options.IdleTimeout = TimeSpan.FromMinutes(10);
+                                });
+
+            services.AddHttpContextAccessor();
             services.AddControllersWithViews();
         }
 
@@ -39,6 +59,8 @@ namespace AspNetCoreSession
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseSession();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -47,11 +69,11 @@ namespace AspNetCoreSession
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
+                             {
+                                 endpoints.MapControllerRoute(
+                                                              name : "default",
+                                                              pattern : "{controller=Home}/{action=Index}/{id?}");
+                             });
         }
     }
 }
